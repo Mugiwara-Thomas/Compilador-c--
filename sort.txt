@@ -1,0 +1,35 @@
+int arr[10];
+/* teste
+void sort(void) {
+    int i;
+    int j;
+    int temp;
+    i = 0;
+    while (i < 9) {
+        j = i + 1;
+        while (j < 10) {
+            if (arr[j] < arr[i]) {
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+}
+
+void main(void) {
+    int k;
+    k = 0;
+    while (k < 10) {
+        arr[k] = input();
+        k = k + 1;
+    }
+    sort();
+    k = 0;
+    while (k < 10) {
+        output(arr[k]);
+        k = k + 1;
+    }
+}
