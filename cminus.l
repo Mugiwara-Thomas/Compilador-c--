@@ -15,7 +15,7 @@
 
 %% 
 "/*" {printToken("TOKEN_COMMENT_START", yytext);}
-"//".* {printToken("TOKEN_LINE_COMMENT", yytext);}
+"//" {printToken("TOKEN_LINE_COMMENT", yytext);}
 "*/" {printToken("TOKEN_COMMENT_END", yytext);}
 "&" { /* Verifica símbolos especiais */}
 "+" {printToken("TOKEN_PLUS", yytext);}
