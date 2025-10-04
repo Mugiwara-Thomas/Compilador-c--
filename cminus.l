@@ -18,7 +18,9 @@
 "//".*    { /* ignora comentário */ }
 
 <COMMENT>"*/" { BEGIN(INITIAL); }
+<COMMENT>\r\n { }
 <COMMENT>\n { }
+<COMMENT>\r { }
 <COMMENT>. { }
 <COMMENT><<EOF>> {fprintf(stderr, "Erro léxico: comentário não fechado na linha %d\n", comment_start_line); exit(1);}
 
@@ -57,7 +59,9 @@
 }
 
 [ \t]+ { }
+\r\n { }
 \n { }
+\r { }
 . { 
     fprintf(stderr, "Erro léxico: caractere inválido '%s' na linha %d\n", yytext, yylineno);
     exit(1);
