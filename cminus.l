@@ -14,16 +14,9 @@
 %x COMMENT
 
 %% 
-"/*"                          { comment_start_line = yylineno; BEGIN(COMMENT); }
-"//".*    { /* ignora comentário */ }
-
-<COMMENT>"*/" { BEGIN(INITIAL); }
-<COMMENT>\r\n { }
-<COMMENT>\n { }
-<COMMENT>\r { }
-<COMMENT>. { }
-<COMMENT><<EOF>> {fprintf(stderr, "Erro léxico: comentário não fechado na linha %d\n", comment_start_line); exit(1);}
-
+"/*" {printToken("TOKEN_COMMENT_START", yytext);}
+"//".* {printToken("TOKEN_LINE_COMMENT", yytext);}
+"*/" {printToken("TOKEN_COMMENT_END", yytext);}
 "&" { /* Verifica símbolos especiais */}
 "+" {printToken("TOKEN_PLUS", yytext);}
 "-" {printToken("TOKEN_MINUS", yytext);}
