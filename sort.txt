@@ -1,5 +1,5 @@
 int arr[10];
-/* teste
+/* teste */
 void sort(void) {
     int i;
     int j;
