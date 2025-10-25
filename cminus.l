@@ -1,108 +1,29 @@
 %{
-  #include <stdio.h>
-  #include <string.h>
-  #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "cminus.tab.h"
 
-  // Definição dos tokens
-  typedef enum {
-    TOKEN_PLUS,
-    TOKEN_MINUS,
-    TOKEN_MULT,
-    TOKEN_DIV,
-    TOKEN_MINOR,
-    TOKEN_GREATER,
-    TOKEN_MINOR_EQUAL,
-    TOKEN_GREATER_EQUAL,
-    TOKEN_EQUAL_EQUAL,
-    TOKEN_NOT_EQUAL,
-    TOKEN_EQUAL,
-    TOKEN_SEMICOLON,
-    TOKEN_COMMA,
-    TOKEN_LEFT_PARENTHESIS,
-    TOKEN_RIGHT_PARENTHESIS,
-    TOKEN_LEFT_BRACKET,
-    TOKEN_RIGHT_BRACKET,
-    TOKEN_LEFT_SQUARE_BRACKET,
-    TOKEN_RIGHT_SQUARE_BRACKET,
-    TOKEN_IF,
-    TOKEN_ELSE,
-    TOKEN_INT,
-    TOKEN_RETURN,
-    TOKEN_VOID,
-    TOKEN_WHILE,
-    TOKEN_NUM,
-    TOKEN_ID,
-    TOKEN_COMMENT_START,
-    TOKEN_COMMENT_END,
-    TOKEN_EOF_TOKEN,
-    TOKEN_ERROR
-  } TokenType;
+extern int yylineno;
 
-  // Estrutura para representar um token
-  typedef struct {
-    TokenType type;
-    char lexema[256];
-    int linha;
-  } Token;
+// Variáveis para rastrear estruturas abertas
+int open_braces = 0;
+int open_parens = 0;
+int open_brackets = 0;
 
-  Token current_token;
+int comment_start_line = 0;
 
-  // Função para criar um token
-  Token createToken(TokenType type, const char* lexema, int linha) {
-    Token t;
-    t.type = type;
-    t.linha = linha;
-    if (lexema) {
-      strncpy(t.lexema, lexema, 255);
-    } else {
-      t.lexema[0] = '\0';
+void check_unclosed_structures() {
+    if (open_braces > 0) {
+        fprintf(stderr, "Erro: %d chave(s) '}' não fechada(s)\n", open_braces);
     }
-    t.lexema[255] = '\0';
-    return t;
-  }
-
-  // Função para retornar o nome do token
-  const char* tokenTypeName(TokenType type) {
-    switch(type) {
-      case TOKEN_PLUS: return "TOKEN_PLUS";
-      case TOKEN_MINUS: return "TOKEN_MINUS";
-      case TOKEN_MULT: return "TOKEN_MULT";
-      case TOKEN_DIV: return "TOKEN_DIV";
-      case TOKEN_MINOR: return "TOKEN_MINOR";
-      case TOKEN_GREATER: return "TOKEN_GREATER";
-      case TOKEN_MINOR_EQUAL: return "TOKEN_MINOR_EQUAL";
-      case TOKEN_GREATER_EQUAL: return "TOKEN_GREATER_EQUAL";
-      case TOKEN_EQUAL_EQUAL: return "TOKEN_EQUAL_EQUAL";
-      case TOKEN_NOT_EQUAL: return "TOKEN_NOT_EQUAL";
-      case TOKEN_EQUAL: return "TOKEN_EQUAL";
-      case TOKEN_SEMICOLON: return "TOKEN_SEMICOLON";
-      case TOKEN_COMMA: return "TOKEN_COMMA";
-      case TOKEN_LEFT_PARENTHESIS: return "TOKEN_LEFT_PARENTHESIS";
-      case TOKEN_RIGHT_PARENTHESIS: return "TOKEN_RIGHT_PARENTHESIS";
-      case TOKEN_LEFT_BRACKET: return "TOKEN_LEFT_BRACKET";
-      case TOKEN_RIGHT_BRACKET: return "TOKEN_RIGHT_BRACKET";
-      case TOKEN_LEFT_SQUARE_BRACKET: return "TOKEN_LEFT_SQUARE_BRACKET";
-      case TOKEN_RIGHT_SQUARE_BRACKET: return "TOKEN_RIGHT_SQUARE_BRACKET";
-      case TOKEN_IF: return "TOKEN_IF";
-      case TOKEN_ELSE: return "TOKEN_ELSE";
-      case TOKEN_INT: return "TOKEN_INT";
-      case TOKEN_RETURN: return "TOKEN_RETURN";
-      case TOKEN_VOID: return "TOKEN_VOID";
-      case TOKEN_WHILE: return "TOKEN_WHILE";
-      case TOKEN_NUM: return "TOKEN_NUM";
-      case TOKEN_ID: return "TOKEN_ID";
-      case TOKEN_COMMENT_START: return "TOKEN_COMMENT_START";
-      case TOKEN_COMMENT_END: return "TOKEN_COMMENT_END";
-      case TOKEN_EOF_TOKEN: return "TOKEN_EOF";
-      case TOKEN_ERROR: return "TOKEN_ERROR";
-      default: return "UNKNOWN";
+    if (open_parens > 0) {
+        fprintf(stderr, "Erro: %d parêntese(s) ')' não fechado(s)\n", open_parens);
     }
-  }
-
-  // Função para printar um token
-  void printToken(Token t) {
-    printf("%s(%s) - linha %d\n", tokenTypeName(t.type), t.lexema, t.linha);
-  }
+    if (open_brackets > 0) {
+        fprintf(stderr, "Erro: %d colchete(s) ']' não fechado(s)\n", open_brackets);
+    }
+}
 %}
 
 %option noyywrap
@@ -111,88 +32,80 @@
 
 %%
 
-"/*"                          { current_token = createToken(TOKEN_COMMENT_START, yytext, yylineno); BEGIN(COMMENT); return 1; }
-"//".*                        { /* ignora comentário de linha */ }
-<COMMENT>"*/"                 { BEGIN(INITIAL); current_token = createToken(TOKEN_COMMENT_END, yytext, yylineno); return 1; }
+"/*"                          { 
+    comment_start_line = yylineno;
+    BEGIN(COMMENT); 
+}
+
+<COMMENT>"*/"                 { BEGIN(INITIAL); }
 <COMMENT>\n                   { }
 <COMMENT>.                    { }
-<COMMENT><<EOF>>              { BEGIN(INITIAL); /* comentário não fechado - deixa o parser detectar */ }
 
-"+"                           { current_token = createToken(TOKEN_PLUS, yytext, yylineno); return 1; }
-"-"                           { current_token = createToken(TOKEN_MINUS, yytext, yylineno); return 1; }
-"*"                           { current_token = createToken(TOKEN_MULT, yytext, yylineno); return 1; }
-"/"                           { current_token = createToken(TOKEN_DIV, yytext, yylineno); return 1; }
-"<="                          { current_token = createToken(TOKEN_MINOR_EQUAL, yytext, yylineno); return 1; }
-">="                          { current_token = createToken(TOKEN_GREATER_EQUAL, yytext, yylineno); return 1; }
-"=="                          { current_token = createToken(TOKEN_EQUAL_EQUAL, yytext, yylineno); return 1; }
-"!="                          { current_token = createToken(TOKEN_NOT_EQUAL, yytext, yylineno); return 1; }
-"<"                           { current_token = createToken(TOKEN_MINOR, yytext, yylineno); return 1; }
-">"                           { current_token = createToken(TOKEN_GREATER, yytext, yylineno); return 1; }
-"="                           { current_token = createToken(TOKEN_EQUAL, yytext, yylineno); return 1; }
-";"                           { current_token = createToken(TOKEN_SEMICOLON, yytext, yylineno); return 1; }
-","                           { current_token = createToken(TOKEN_COMMA, yytext, yylineno); return 1; }
-"("                           { current_token = createToken(TOKEN_LEFT_PARENTHESIS, yytext, yylineno); return 1; }
-")"                           { current_token = createToken(TOKEN_RIGHT_PARENTHESIS, yytext, yylineno); return 1; }
-"{"                           { current_token = createToken(TOKEN_LEFT_BRACKET, yytext, yylineno); return 1; }
-"}"                           { current_token = createToken(TOKEN_RIGHT_BRACKET, yytext, yylineno); return 1; }
-"["                           { current_token = createToken(TOKEN_LEFT_SQUARE_BRACKET, yytext, yylineno); return 1; }
-"]"                           { current_token = createToken(TOKEN_RIGHT_SQUARE_BRACKET, yytext, yylineno); return 1; }
-
-[0-9]+                        { current_token = createToken(TOKEN_NUM, yytext, yylineno); return 1; }
-
-[a-zA-Z_][a-zA-Z0-9_]*        {
-  if (strcmp(yytext, "if") == 0) current_token = createToken(TOKEN_IF, yytext, yylineno);
-  else if (strcmp(yytext, "else") == 0) current_token = createToken(TOKEN_ELSE, yytext, yylineno);
-  else if (strcmp(yytext, "int") == 0) current_token = createToken(TOKEN_INT, yytext, yylineno);
-  else if (strcmp(yytext, "return") == 0) current_token = createToken(TOKEN_RETURN, yytext, yylineno);
-  else if (strcmp(yytext, "void") == 0) current_token = createToken(TOKEN_VOID, yytext, yylineno);
-  else if (strcmp(yytext, "while") == 0) current_token = createToken(TOKEN_WHILE, yytext, yylineno);
-  else current_token = createToken(TOKEN_ID, yytext, yylineno);
-  return 1;
+<COMMENT><<EOF>>              { 
+    fprintf(stderr, "Erro: comentário não fechado (iniciado na linha %d)\n", comment_start_line); 
+    check_unclosed_structures();
+    return 0;
 }
 
-[ \t]+                        { /* ignora espaços */ }
-\n                            { /* ignora quebras de linha */ }
+"//".*                        { /* ignora comentário de linha */ }
+
+"("                           { open_parens++; return TOKEN_LEFT_PARENTHESIS; }
+")"                           { 
+    if (open_parens > 0) open_parens--; 
+    else fprintf(stderr, "Erro: parêntese fechado ')' sem abertura na linha %d\n", yylineno);
+    return TOKEN_RIGHT_PARENTHESIS; 
+}
+
+"{"                           { open_braces++; return TOKEN_LEFT_BRACKET; }
+"}"                           { 
+    if (open_braces > 0) open_braces--; 
+    else fprintf(stderr, "Erro: chave fechada '}' sem abertura na linha %d\n", yylineno);
+    return TOKEN_RIGHT_BRACKET; 
+}
+
+"["                           { open_brackets++; return TOKEN_LEFT_SQUARE_BRACKET; }
+"]"                           { 
+    if (open_brackets > 0) open_brackets--; 
+    else fprintf(stderr, "Erro: colchete fechado ']' sem abertura na linha %d\n", yylineno);
+    return TOKEN_RIGHT_SQUARE_BRACKET; 
+}
+
+"+"                           { return TOKEN_PLUS; }
+"-"                           { return TOKEN_MINUS; }
+"*"                           { return TOKEN_MULT; }
+"/"                           { return TOKEN_DIV; }
+"<="                          { return TOKEN_MINOR_EQUAL; }
+">="                          { return TOKEN_GREATER_EQUAL; }
+"=="                          { return TOKEN_EQUAL_EQUAL; }
+"!="                          { return TOKEN_NOT_EQUAL; }
+"<"                           { return TOKEN_MINOR; }
+">"                           { return TOKEN_GREATER; }
+"="                           { return TOKEN_EQUAL; }
+";"                           { return TOKEN_SEMICOLON; }
+","                           { return TOKEN_COMMA; }
+
+[0-9]+                        { return TOKEN_NUM; }
+
+[a-zA-Z][a-zA-Z0-9_]*         {
+    if (strcmp(yytext, "if") == 0) return TOKEN_IF;
+    else if (strcmp(yytext, "else") == 0) return TOKEN_ELSE;
+    else if (strcmp(yytext, "int") == 0) return TOKEN_INT;
+    else if (strcmp(yytext, "return") == 0) return TOKEN_RETURN;
+    else if (strcmp(yytext, "void") == 0) return TOKEN_VOID;
+    else if (strcmp(yytext, "while") == 0) return TOKEN_WHILE;
+    else return TOKEN_ID;
+}
+
+[ \t\n]+                      { /* ignora espaços, tabs e novas linhas */ }
 
 .                             {
-  fprintf(stderr, "Erro léxico: caractere inválido '%s' na linha %d\n", yytext, yylineno);
-  exit(1);
+    fprintf(stderr, "Erro léxico na linha %d: caractere inválido '%s'\n", yylineno, yytext);
+    return 0;
 }
 
-<<EOF>>                       { return 0; }
+<<EOF>>                       { 
+    check_unclosed_structures();
+    return TOKEN_EOF_TOKEN; 
+}
 
 %%
-
-Token getNextToken() {
-  if (yylex() == 0) {
-    return createToken(TOKEN_EOF_TOKEN, "", yylineno);
-  }
-  return current_token;
-}
-
-int main(int argc, char **argv) {
-  if (argc < 2) {
-    fprintf(stderr, "Uso: %s arquivo_de_entrada\n", argv[0]);
-    return 1;
-  }
-
-  FILE *f = fopen(argv[1], "r");
-  if (!f) {
-    perror("Erro ao abrir arquivo");
-    return 1;
-  }
-
-  yyin = f;
-
-  Token t;
-  printf("=== Tokens Identificados ===\n");
-  while (1) {
-    t = getNextToken();
-    if (t.type == TOKEN_EOF_TOKEN) break;
-    printToken(t);
-  }
-
-  printf("\n=== Fim da análise léxica ===\n");
-  fclose(f);
-  return 0;
-}
