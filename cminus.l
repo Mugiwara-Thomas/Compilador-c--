@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "arvore.h"
 #include "cminus.tab.h"
 
 extern int yylineno;
@@ -84,7 +85,10 @@ void check_unclosed_structures() {
 ";"                           { return TOKEN_SEMICOLON; }
 ","                           { return TOKEN_COMMA; }
 
-[0-9]+                        { return TOKEN_NUM; }
+[0-9]+                        { 
+    yylval.lexema = strdup(yytext);
+    return TOKEN_NUM; 
+    }
 
 [a-zA-Z][a-zA-Z0-9_]*         {
     if (strcmp(yytext, "if") == 0) return TOKEN_IF;
@@ -93,7 +97,10 @@ void check_unclosed_structures() {
     else if (strcmp(yytext, "return") == 0) return TOKEN_RETURN;
     else if (strcmp(yytext, "void") == 0) return TOKEN_VOID;
     else if (strcmp(yytext, "while") == 0) return TOKEN_WHILE;
-    else return TOKEN_ID;
+    else{
+        yylval.lexema = strdup(yytext);
+        return TOKEN_ID;
+    }
 }
 
 [ \t\n]+                      { /* ignora espaços, tabs e novas linhas */ }
@@ -105,7 +112,7 @@ void check_unclosed_structures() {
 
 <<EOF>>                       { 
     check_unclosed_structures();
-    return TOKEN_EOF_TOKEN; 
+    return 0; 
 }
 
 %%

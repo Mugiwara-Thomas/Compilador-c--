@@ -1,5 +1,5 @@
-/* TESTE
-in gcd(int u, int v) {
+/* TESTE */
+int gcd(int u, int v) {
     if (v == 0) return u;
     else return gcd(v, u - v);
 }
