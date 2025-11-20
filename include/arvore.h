@@ -28,6 +28,12 @@ typedef enum
   NO_NUM
 } NodeType;
 
+typedef enum {
+  Void,
+  Integer,
+  Boolean
+} ExpType;
+
 typedef struct TreeNode
 {
   struct TreeNode *filho;
@@ -41,6 +47,8 @@ typedef struct TreeNode
     char *lexema;
     int valor;
   } attr;
+
+  ExpType type;
 } TreeNode;
 
 // Funções auxiliares

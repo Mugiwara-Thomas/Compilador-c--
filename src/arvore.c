@@ -15,7 +15,7 @@ TreeNode *novoNo(NodeType tipo, int lineno)
   no->irmao = NULL;
   no->tipoNo = tipo;
   no->lineno = lineno;
-
+  no->type = Void;
   return no;
 }
 
@@ -29,6 +29,10 @@ TreeNode *novoNoToken(NodeType tipo, char *lexema, int lineno)
   else
   {
     no->attr.lexema = NULL;
+  }
+
+  if(tipo == NO_NUM){
+    no->type = Integer;  
   }
   return no;
 }

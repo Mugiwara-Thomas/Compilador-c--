@@ -29,6 +29,8 @@ void check_unclosed_structures() {
 
 %option noyywrap
 %option yylineno
+%option nounput
+%option noinput
 %x COMMENT
 
 %%

@@ -1,5 +1,8 @@
 # Compilador-c--
 
+# Estrutura
+- **Makefile**: Script para compilação, limpeza e verificações de memória.
+
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
