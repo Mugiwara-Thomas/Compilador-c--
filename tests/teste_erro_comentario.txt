@@ -1,0 +1,15 @@
+/* Este arquivo testa o erro de comentario nao fechado */
+
+void main(void) {
+    int x;
+    x = 10;
+}
+
+/* Aqui comeca um comentario que nunca termina...
+   int y = 20;
+   if (x > 0) {
+       return;
+   }
+   
+   Ainda comentando...
+   Chegando ao fim do arquivo...

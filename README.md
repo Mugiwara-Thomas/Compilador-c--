@@ -1,7 +1,8 @@
 # Compilador-c--
 
 # Estrutura
-- **Makefile**: Script para compilação, limpeza e verificações de memória.
+- **Makefile**: Código para compilação, limpeza e verificações de memória.
+- **cminus.l**: Código com as regras para a análise léxica utilizando Flex.
 
 ```bash
 sudo apt update && sudo apt upgrade -y

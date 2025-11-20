@@ -1,0 +1,38 @@
+/* Teste Completo da Linguagem C- */
+/* Testa palavras-chave, identificadores e simbolos */
+
+void main(void) {
+    /* Declaracoes */
+    int x;
+    int Y; /* Case sensitive: Y diferente de y */
+    int voidId; /* 'voidId' contem 'void', mas eh um ID valido */
+    int whileTrue; 
+    int array[100];
+
+    /* Atribuicoes e Operadores Aritmeticos */
+    x = 12345;
+    Y = x + 10 - 5 * 2 / 1;
+    
+    /* Teste de espacamento "apertado" */
+    x=Y+x*(20/2);
+    
+    /* Operadores Relacionais */
+    if (x < Y) return x;
+    if (x <= Y) return x;
+    if (x > Y) return 0;
+    if (x >= 10) return 1;
+    if (x == Y) return x;
+    if (x != 0) return x;
+
+    /* Estruturas de Controle */
+    while (x > 0) {
+        x = x - 1;
+    }
+
+    /* Chamadas de funcao e aninhamento */
+    output(input());
+    
+    return;
+}
+
+/* Fim do arquivo */

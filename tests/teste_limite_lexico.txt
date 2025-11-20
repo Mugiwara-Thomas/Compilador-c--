@@ -1,0 +1,35 @@
+/* Teste de Limites e Colagem de Tokens */
+
+/* 1. Identificadores longos e Keywords como prefixo/sufixo */
+/* (Declarações globais são permitidas) */
+int integer;      /* ID valido */
+int retur;        /* ID valido */
+int voided;       /* ID valido */
+int ELSE;         /* ID valido */
+int If;           /* ID valido */
+
+/* Para testar expressões, precisamos estar dentro de uma função */
+void main(void) {
+    int x; int a; int b; int c; int d; int e;
+    int var[20]; 
+
+    /* 2. Colagem de Operadores e Numeros/IDs */
+    x=a+b-c*d/e;
+    if(a<=b) return;
+    x=123+456;
+    var[10] = 0; /* Corrigido para ser uma atribuição válida */
+
+    /* 3. Comentarios 'estranhos' mas validos */
+    /**/
+    /***/
+    /* *** */
+    /* comentario com * dentro e / tambem */
+    /* int x; este codigo esta comentado */
+    /* if (x < 10) return; */
+    
+    /* 4. ID e Numeros colados */
+    /* Sintaticamente isso vai dar erro de qualquer jeito porque
+       'var 123;' não é uma instrução válida, mas lexicalmente gera 2 tokens. 
+       Se quiser evitar erro sintático, comente ou faça atribuição */
+    /* var123;  <-- Isso gera erro sintático (ID seguido de NUM) */
+}
