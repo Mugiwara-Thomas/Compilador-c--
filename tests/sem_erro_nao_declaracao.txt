@@ -1,0 +1,14 @@
+/* Teste: Uso de identificadores nao declarados */
+
+void main(void) {
+    int x;
+    
+    /* Erro 1: Variavel 'y' nao declarada */
+    x = y + 1;
+    
+    /* Erro 2: Funcao 'soma' nao declarada */
+    x = soma(x, 10);
+
+    /* Erro 3: Atribuicao a variavel nao declarada */
+    z = 10;
+}

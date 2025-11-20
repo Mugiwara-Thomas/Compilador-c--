@@ -1,0 +1,28 @@
+/* Teste: Chamadas de Funcao e Retornos */
+
+int soma(int a, int b) {
+    return a + b;
+}
+
+void proc(void) {
+    /* Erro: Funcao void retornando valor */
+    return 10;
+}
+
+int funcInt(void) {
+    /* Erro: Funcao int sem return (ou return vazio) */
+    return;
+}
+
+void main(void) {
+    int x;
+    
+    /* Erro: Numero incorreto de argumentos (espera 2, recebeu 1) */
+    x = soma(10);
+    
+    /* Erro: Numero incorreto de argumentos (espera 2, recebeu 3) */
+    x = soma(1, 2, 3);
+    
+    /* Erro: Passando argumento para funcao void */
+    proc(10);
+}

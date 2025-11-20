@@ -1,0 +1,22 @@
+/* Teste: Violacao de Escopo */
+
+void funcaoA(void) {
+    int a;
+    a = 10;
+}
+
+void main(void) {
+    int x;
+    
+    /* A variavel 'a' existe, mas nao neste escopo */
+    x = a; 
+    
+    {
+        int blocoVar;
+        blocoVar = 1;
+    }
+    
+    /* 'blocoVar' so existe dentro do bloco acima (se seu compilador suportar escopo de bloco) 
+       Se suportar apenas escopo de funcao, este teste pode variar */
+    x = blocoVar;
+}

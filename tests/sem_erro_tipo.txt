@@ -1,0 +1,21 @@
+/* Teste: Erros de Tipo e Uso de Void */
+
+/* Erro 1: Variavel nao pode ser void */
+void variavelInvalida; 
+
+void funcaoSemRetorno(void) {
+    return;
+}
+
+void main(void) {
+    int x;
+    int y;
+
+    /* Erro 2: Tentando usar resultado de void em expressao */
+    x = 10 + funcaoSemRetorno();
+
+    /* Erro 3: Testando void em condicional (alguns compiladores C- proíbem) */
+    if (funcaoSemRetorno()) {
+        x = 0;
+    }
+}

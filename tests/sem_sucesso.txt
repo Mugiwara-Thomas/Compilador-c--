@@ -1,0 +1,35 @@
+/* Teste: Codigo Semanticamente Correto */
+
+int vetor[10];
+
+int funcao(int a) {
+    if (a > 0) 
+        return a;
+    else 
+        return 0;
+}
+
+void procedimento(void) {
+    int local;
+    local = 5;
+    while (local > 0) {
+        local = local - 1;
+    }
+}
+
+void main(void) {
+    int x;
+    int y;
+    
+    x = input();
+    y = funcao(x);
+    
+    if (y == x) {
+        vetor[0] = 1;
+    } else {
+        vetor[0] = 0;
+    }
+    
+    procedimento();
+    output(vetor[0]);
+}

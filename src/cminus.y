@@ -11,8 +11,7 @@ extern char* yytext;
 
 // Função para tratamento de erro padrão do bison
 void yyerror(const char* s) {
-    fprintf(stderr, "Erro sintático na linha %d: %s\n", yylineno, s);
-    fprintf(stderr, "Token: '%s'\n", yytext);
+    printf("ERRO SINTÁTICO: %s LINHA: %d\n", yytext, yylineno);
 }
 %}
 
