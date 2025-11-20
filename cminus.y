@@ -3,23 +3,29 @@
 #include <stdlib.h>
 #include "arvore.h"
 
+// Declarações externas para funções e variáveis do analisador léxico
 extern int yylex(void);
 extern FILE *yyin;
 extern int yylineno;
 extern char* yytext;
 
+// Função para tratamento de erro padrão do bison
 void yyerror(const char* s) {
     fprintf(stderr, "Erro sintático na linha %d: %s\n", yylineno, s);
     fprintf(stderr, "Token: '%s'\n", yytext);
 }
 %}
 
-
+/* Isso aqui define os tipos de dados que um símbolo pode carregar 
+    - nó,ponteiro para um nó da árvore (Treenode*)
+    - lexema, string pura, usada para tokens com id e num
+*/
 %union {
     TreeNode *no;
     char *lexema;
 }
 
+/* Definição de tokens (símbolos terminais) */
 %token TOKEN_PLUS TOKEN_MINUS TOKEN_MULT TOKEN_DIV
 %token TOKEN_MINOR TOKEN_GREATER TOKEN_MINOR_EQUAL TOKEN_GREATER_EQUAL
 %token TOKEN_EQUAL_EQUAL TOKEN_NOT_EQUAL TOKEN_EQUAL
@@ -29,15 +35,22 @@ void yyerror(const char* s) {
 %token TOKEN_LEFT_SQUARE_BRACKET TOKEN_RIGHT_SQUARE_BRACKET
 %token TOKEN_IF TOKEN_ELSE TOKEN_INT TOKEN_RETURN TOKEN_VOID TOKEN_WHILE
 
+/* Definição de tokens (símbolos terminais) que carregam um lexema*/
 %token <lexema> TOKEN_NUM
 %token <lexema> TOKEN_ID
 
+/* Definição de precedencia e associatividade de operadores, isso é feito para resolver a ambiguidade e evitar excesso de regras gramáticais
+    A ordem define a prioridade dos operadores (de baixo para cima: menor para maior prioridade)
+ */
 %left TOKEN_PLUS TOKEN_MINUS
 %left TOKEN_MULT TOKEN_DIV
 %nonassoc TOKEN_MINOR TOKEN_GREATER TOKEN_MINOR_EQUAL TOKEN_GREATER_EQUAL TOKEN_EQUAL_EQUAL TOKEN_NOT_EQUAL
+
+/* Isso aqui é feito para resolver o problema de dangling else, (if sem else vs if com else) */
 %nonassoc TOKEN_IF_SEM_ELSE
 %precedence TOKEN_ELSE
 
+/* Definição dos tipos dos símbolos não-terminais (mapeiam para union) */
 %type <no> program declaration_list declaration var_declaration type_specifier
 %type <no> fun_declaration params param_list param compound_stmt
 %type <no> local_declarations statement_list statement expression_stmt
@@ -46,12 +59,11 @@ void yyerror(const char* s) {
 %type <no> mulop factor call args arg_list
 
 %%
-/* ===== REGRAS COM AÇÕES DE CONSTRUÇÃO DA ÁRVORE ===== */
-/* $$ = Nó a ser retornado por esta regra
-   $1 = Nó retornado pelo 1º item da regra
-   $2 = Nó/valor retornado pelo 2º item da regra, etc.
-*/
 
+/* Regra Inicial: program
+   Um programa consiste em uma lista de declarações.
+   A raiz da árvore (raizArvore) aponta para este nó.
+*/
 program:
     declaration_list
     {
@@ -62,6 +74,10 @@ program:
     }
     ;
 
+/* Lista de declarações (variáveis ou funções).
+   Lógica de Lista Encadeada: Percorre os irmãos de $1 até o fim 
+   e anexa a nova declaração ($2) lá.
+*/
 declaration_list:
     declaration_list declaration 
     {
@@ -89,6 +105,7 @@ declaration:
     | fun_declaration { $$ = $1;}
     ;
 
+/* Declaração de Variável: int x; ou int x[10]; */
 var_declaration:
     type_specifier TOKEN_ID TOKEN_SEMICOLON 
     {
@@ -113,6 +130,9 @@ type_specifier:
     | TOKEN_VOID { $$ = novoNo(NO_TIPO_VOID, yylineno); }
     ;
 
+/* Declaração de Função: int main(...) { ... }
+   Estrutura: Nó Função -> (Filho: Tipo) -> (Irmão: ID) -> (Irmão: Params) -> (Irmão: Corpo)
+*/
 fun_declaration:
     type_specifier TOKEN_ID TOKEN_LEFT_PARENTHESIS params TOKEN_RIGHT_PARENTHESIS compound_stmt
     {
@@ -120,7 +140,20 @@ fun_declaration:
         $$->filho = $1;
         $$->filho->irmao = novoNoToken(NO_ID, $2, yylineno);
         $$->filho->irmao->irmao = $4;
-        $$->filho->irmao->irmao->irmao = $6;
+
+        // precisamos encontrar o ultimo parametro da lista
+        TreeNode *curr = $4;
+        while(curr != NULL && curr->irmao != NULL){
+            curr = curr->irmao;
+        }
+
+        // Se nos tivermos parametros, conecta o corpo ao ultimo deles
+        // Se nao houver (curr == NULL), conecta no ID da funçao
+        if(curr != NULL){
+            curr->irmao = $6;
+        } else {
+            $$->filho->irmao->irmao = $6;
+        }
         free($2);
     }
     ;
@@ -130,6 +163,7 @@ params:
     | TOKEN_VOID { $$ = novoNo(NO_TIPO_VOID, yylineno); }
     ;
 
+/* Lista de parâmetros separados por vírgula */
 param_list:
     param_list TOKEN_COMMA param
     {
@@ -159,6 +193,7 @@ param:
     }
     ;
 
+/* Bloco de Código: { declarações locais ... comandos ... } */
 compound_stmt:
     TOKEN_LEFT_BRACKET local_declarations statement_list TOKEN_RIGHT_BRACKET
     {
@@ -209,6 +244,7 @@ statement_list:
     | /* empty */ { $$ = NULL; }
     ;
 
+/* Tipos de Statements (Comandos) */
 statement:
     expression_stmt { $$ = $1; }
     | compound_stmt   { $$ = $1; }
@@ -222,6 +258,7 @@ expression_stmt:
     | TOKEN_SEMICOLON { $$ = NULL; }
     ;
 
+/* IF e IF-ELSE */
 selection_stmt:
     TOKEN_IF TOKEN_LEFT_PARENTHESIS expression TOKEN_RIGHT_PARENTHESIS statement %prec TOKEN_IF_SEM_ELSE
     {
@@ -238,6 +275,7 @@ selection_stmt:
     }
     ;
 
+/* WHILE */
 iteration_stmt:
     TOKEN_WHILE TOKEN_LEFT_PARENTHESIS expression TOKEN_RIGHT_PARENTHESIS statement
     {
@@ -259,6 +297,7 @@ return_stmt:
     }
     ;
 
+/* Expressão de Atribuição ou Simples */
 expression:
     var TOKEN_EQUAL expression
     {
@@ -284,6 +323,7 @@ var:
     }
     ;
 
+/* Operações Relacionais (==, !=, <, etc) */
 simple_expression:
     additive_expression relop additive_expression
     {
@@ -303,6 +343,7 @@ relop:
     | TOKEN_NOT_EQUAL     { $$ = novoNoToken(NO_OP_REL, "!=", yylineno); }
     ;
 
+/* Expressões Aditivas (+, -) */
 additive_expression:
     additive_expression addop term
     {
@@ -318,6 +359,7 @@ addop:
     | TOKEN_MINUS { $$ = novoNoToken(NO_OP_SOMA, "-", yylineno); }
     ;
 
+/* Expressões Multiplicativas (*, /) */
 term:
     term mulop factor
     {
@@ -344,6 +386,7 @@ factor:
     }
     ;
 
+/* Chamada de Função */
 call:
     TOKEN_ID TOKEN_LEFT_PARENTHESIS args TOKEN_RIGHT_PARENTHESIS
     {

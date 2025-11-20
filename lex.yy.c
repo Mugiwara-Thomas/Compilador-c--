@@ -497,6 +497,7 @@ char *yytext;
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "arvore.h"
 #include "cminus.tab.h"
 
 extern int yylineno;
@@ -519,9 +520,9 @@ void check_unclosed_structures() {
         fprintf(stderr, "Erro: %d colchete(s) ']' não fechado(s)\n", open_brackets);
     }
 }
-#line 523 "lex.yy.c"
+#line 524 "lex.yy.c"
 
-#line 525 "lex.yy.c"
+#line 526 "lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -739,10 +740,10 @@ YY_DECL
 		}
 
 	{
-#line 33 "cminus.l"
+#line 34 "cminus.l"
 
 
-#line 746 "lex.yy.c"
+#line 747 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -811,7 +812,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 35 "cminus.l"
+#line 36 "cminus.l"
 { 
     comment_start_line = yylineno;
     BEGIN(COMMENT); 
@@ -819,22 +820,22 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 40 "cminus.l"
+#line 41 "cminus.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 41 "cminus.l"
+#line 42 "cminus.l"
 { }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 42 "cminus.l"
+#line 43 "cminus.l"
 { }
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
-#line 44 "cminus.l"
+#line 45 "cminus.l"
 { 
     fprintf(stderr, "Erro: comentário não fechado (iniciado na linha %d)\n", comment_start_line); 
     check_unclosed_structures();
@@ -843,17 +844,17 @@ case YY_STATE_EOF(COMMENT):
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 50 "cminus.l"
+#line 51 "cminus.l"
 { /* ignora comentário de linha */ }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 52 "cminus.l"
+#line 53 "cminus.l"
 { open_parens++; return TOKEN_LEFT_PARENTHESIS; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 53 "cminus.l"
+#line 54 "cminus.l"
 { 
     if (open_parens > 0) open_parens--; 
     else fprintf(stderr, "Erro: parêntese fechado ')' sem abertura na linha %d\n", yylineno);
@@ -862,12 +863,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 59 "cminus.l"
+#line 60 "cminus.l"
 { open_braces++; return TOKEN_LEFT_BRACKET; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 60 "cminus.l"
+#line 61 "cminus.l"
 { 
     if (open_braces > 0) open_braces--; 
     else fprintf(stderr, "Erro: chave fechada '}' sem abertura na linha %d\n", yylineno);
@@ -876,12 +877,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 66 "cminus.l"
+#line 67 "cminus.l"
 { open_brackets++; return TOKEN_LEFT_SQUARE_BRACKET; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 67 "cminus.l"
+#line 68 "cminus.l"
 { 
     if (open_brackets > 0) open_brackets--; 
     else fprintf(stderr, "Erro: colchete fechado ']' sem abertura na linha %d\n", yylineno);
@@ -890,77 +891,80 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 73 "cminus.l"
+#line 74 "cminus.l"
 { return TOKEN_PLUS; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 74 "cminus.l"
+#line 75 "cminus.l"
 { return TOKEN_MINUS; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 75 "cminus.l"
+#line 76 "cminus.l"
 { return TOKEN_MULT; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 76 "cminus.l"
+#line 77 "cminus.l"
 { return TOKEN_DIV; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 77 "cminus.l"
+#line 78 "cminus.l"
 { return TOKEN_MINOR_EQUAL; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 78 "cminus.l"
+#line 79 "cminus.l"
 { return TOKEN_GREATER_EQUAL; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 79 "cminus.l"
+#line 80 "cminus.l"
 { return TOKEN_EQUAL_EQUAL; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 80 "cminus.l"
+#line 81 "cminus.l"
 { return TOKEN_NOT_EQUAL; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 81 "cminus.l"
+#line 82 "cminus.l"
 { return TOKEN_MINOR; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 82 "cminus.l"
+#line 83 "cminus.l"
 { return TOKEN_GREATER; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 83 "cminus.l"
+#line 84 "cminus.l"
 { return TOKEN_EQUAL; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 84 "cminus.l"
+#line 85 "cminus.l"
 { return TOKEN_SEMICOLON; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 85 "cminus.l"
+#line 86 "cminus.l"
 { return TOKEN_COMMA; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 87 "cminus.l"
-{ return TOKEN_NUM; }
+#line 88 "cminus.l"
+{ 
+    yylval.lexema = strdup(yytext);
+    return TOKEN_NUM; 
+    }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 89 "cminus.l"
+#line 93 "cminus.l"
 {
     if (strcmp(yytext, "if") == 0) return TOKEN_IF;
     else if (strcmp(yytext, "else") == 0) return TOKEN_ELSE;
@@ -968,36 +972,39 @@ YY_RULE_SETUP
     else if (strcmp(yytext, "return") == 0) return TOKEN_RETURN;
     else if (strcmp(yytext, "void") == 0) return TOKEN_VOID;
     else if (strcmp(yytext, "while") == 0) return TOKEN_WHILE;
-    else return TOKEN_ID;
+    else{
+        yylval.lexema = strdup(yytext);
+        return TOKEN_ID;
+    }
 }
 	YY_BREAK
 case 27:
 /* rule 27 can match eol */
 YY_RULE_SETUP
-#line 99 "cminus.l"
+#line 106 "cminus.l"
 { /* ignora espaços, tabs e novas linhas */ }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 101 "cminus.l"
+#line 108 "cminus.l"
 {
     fprintf(stderr, "Erro léxico na linha %d: caractere inválido '%s'\n", yylineno, yytext);
     return 0;
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 106 "cminus.l"
+#line 113 "cminus.l"
 { 
     check_unclosed_structures();
-    return TOKEN_EOF_TOKEN; 
+    return 0; 
 }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 111 "cminus.l"
+#line 118 "cminus.l"
 ECHO;
 	YY_BREAK
-#line 1001 "lex.yy.c"
+#line 1008 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2012,5 +2019,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 111 "cminus.l"
+#line 118 "cminus.l"
 

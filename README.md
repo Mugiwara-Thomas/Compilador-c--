@@ -9,7 +9,7 @@ sudo apt install flex bison gcc -y
 ```
 
 ```bash
-bisond -d cminus
+bisond -d cminus.y
 ```
 
 ```bash
@@ -17,7 +17,7 @@ flex cminus.l
 ```
 
 ```bash
-gcc -o cminus cminus.tab.c lex.yy.c
+gcc -o cminus cminus.tab.c lex.yy.c arvore.c
 ```
 
 ```bash
