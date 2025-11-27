@@ -2,30 +2,31 @@
 #define _SYMTAB_H_
 
 #include <stdio.h>
+#include "arvore.h" 
 
-// Precisamos ter nome, tipo e escopo
+typedef enum { ID_VAR, ID_FUN, ID_ARRAY } IdKind;
 
-// Lista encadeada para armazenar números das linhas
-typedef struct LineListRec
-{
-  int lineno;
-  struct LineListRec *next;
-} *LineList;
+typedef struct BucketListRec {
+    char * name;
+    int lineno;
+    int loc;
+    int scope;
+    
+    ExpType type;
+    IdKind kind;    
+    
+    int size;
+    int numParams;
+    
+    struct BucketListRec * next;
+} * BucketList;
 
-typedef struct BucketListRec
-{
-  char *nome;
-  char *escopo;
-  char *idType;
-  char *dataType;
-  LineList lines;
-  int memloc;
-  struct BucketListRec *next;
-} *BucketList;
+void st_insert(char * name, int lineno, int loc, int scope, 
+               ExpType type, IdKind kind);
 
-void st_insert(char * nome, int lineno, char * escopo, char * idType, char * dataType);
-int st_lookup(char * nome, char * escopo);
-char* st_lookup_type(char* nome, char* escopo);
+int st_lookup(char * name);
+int st_lookup_scope(char * name, int scope);
+BucketList st_lookup_rec(char * name);
 void printSymTab(FILE * listing);
 
 #endif

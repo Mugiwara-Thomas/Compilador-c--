@@ -415,26 +415,6 @@ arg_list:
 %%
 
 int main(int argc, char **argv) {
-
-    printf("=== TESTE DA TABELA DE SIMBOLOS ===\n");
-    
-    /* Simulando: int gcd(int u, int v) ... */
-    st_insert("gcd", 1, "global", "fun", "int");
-    st_insert("u", 1, "gcd", "param", "int");
-    st_insert("v", 1, "gcd", "param", "int");
-    
-    /* Simulando o uso de variáveis na main */
-    st_insert("x", 6, "main", "var", "int");
-    st_insert("y", 6, "main", "var", "int");
-    
-    /* Simulando uma nova ocorrência de x na linha 7 */
-    st_insert("x", 7, "main", "var", "int");
-
-    /* Imprime a tabela formatada */
-    printSymTab(stdout);
-    printf("===================================\n\n");
-    /* --------------------------------------------- */
-    
     if (argc < 2) {
         fprintf(stderr, "Uso: %s arquivo_de_entrada\n", argv[0]);
         return 1;
@@ -454,6 +434,10 @@ int main(int argc, char **argv) {
     
     if (result == 0) {
         printf("=== Análise sintática concluída com SUCESSO ===\n");
+        
+        printf("\n=== Construindo Tabela de Símbolos ===\n");
+        buildSymTab(raizArvore);
+
         printf("\n=== Árvore Sintática Abstrata ===\n");
         imprimeArvore(raizArvore, 0); 
     } else {

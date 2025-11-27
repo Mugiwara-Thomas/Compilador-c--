@@ -10,14 +10,13 @@ TARGET = $(BIN_DIR)/cminus
 
 # --- Compilador e Flags ---
 CC = gcc
-CFLAGS = -I$(INC_DIR) -I$(SRC_DIR) -Wall -g
+CFLAGS = -I$(INC_DIR) -I$(SRC_DIR) -I. -Wall -g
 
-# --- Arquivos Fonte e Objetos ---
-# AQUI ESTAVA O ERRO: Adicionamos symtab.o na lista
-OBJS = $(OBJ_DIR)/cminus.tab.o $(OBJ_DIR)/lex.yy.o $(OBJ_DIR)/arvore.o $(OBJ_DIR)/symtab.o
+OBJS = $(OBJ_DIR)/cminus.tab.o $(OBJ_DIR)/lex.yy.o $(OBJ_DIR)/arvore.o $(OBJ_DIR)/symtab.o $(OBJ_DIR)/analyze.o
 
 # --- Regras Principais ---
 
+# Garante que os diretórios existem antes de compilar
 $(shell mkdir -p $(OBJ_DIR) $(BIN_DIR))
 
 all: $(TARGET)
@@ -27,23 +26,23 @@ $(TARGET): $(OBJS)
 
 # --- Regras de Compilação Específicas ---
 
+# Parser (Bison)
 $(SRC_DIR)/cminus.tab.c $(SRC_DIR)/cminus.tab.h: $(SRC_DIR)/cminus.y
 	bison -d $< -o $(SRC_DIR)/cminus.tab.c
 
+# Lexer (Flex)
 $(SRC_DIR)/lex.yy.c: $(SRC_DIR)/cminus.l $(SRC_DIR)/cminus.tab.h
 	flex -o $@ $<
 
+# Regra Genérica para qualquer .c em src/ virar .o em obj/
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Regra explícita para symtab (opcional se a regra genérica %.o acima funcionar, mas bom garantir)
-$(OBJ_DIR)/symtab.o: $(SRC_DIR)/symtab.c $(INC_DIR)/symtab.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- Utilitários ---
 
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
+	# Cuidado: Isso remove arquivos gerados dentro de src/
 	rm -f $(SRC_DIR)/cminus.tab.c $(SRC_DIR)/cminus.tab.h $(SRC_DIR)/lex.yy.c
 
 check: all

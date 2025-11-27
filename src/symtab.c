@@ -3,103 +3,106 @@
 #include <string.h>
 #include "symtab.h"
 
+/* Tamanho da tabela hash */
 #define SIZE 211
 #define SHIFT 4
 
+/* A tabela hash (array de listas) */
 static BucketList hashTable[SIZE];
 
-/* Função Hash: Multiplicação e deslocamento */
+/* Função de Hash */
 static int hash(char * key) {
     int temp = 0;
     int i = 0;
-    while (key[i] != '\0') { 
+    while (key[i] != '\0') {
         temp = ((temp << SHIFT) + key[i]) % SIZE;
         ++i;
     }
     return temp;
 }
 
-/* Insere na tabela com os novos campos exigidos */
-void st_insert(char * nome, int lineno, char * escopo, char * idType, char * dataType) {
-    int h = hash(nome);
+/* Insere na tabela */
+void st_insert(char * name, int lineno, int loc, int scope, 
+               ExpType type, IdKind kind) {
+    int h = hash(name);
     BucketList l = hashTable[h];
     
-    // Procura se já existe nessa posição E no mesmo escopo
-    while ((l != NULL) && ((strcmp(nome, l->nome) != 0) || (strcmp(escopo, l->escopo) != 0))) {
-        l = l->next;
-    }
+    l = (BucketList) malloc(sizeof(struct BucketListRec));
+    
+    l->name = strdup(name);
+    l->lineno = lineno;
+    l->loc = loc;
+    l->scope = scope;
+    l->type = type;
+    l->kind = kind;
+    
+    /* Zera os campos opcionais por segurança */
+    l->size = 0;
+    l->numParams = 0;
 
-    if (l == NULL) { /* Variável não está na tabela: inserir nova */
-        l = (BucketList) malloc(sizeof(struct BucketListRec));
-        l->nome = strdup(nome);
-        l->escopo = strdup(escopo);
-        l->idType = strdup(idType);     // Ex: "var", "fun"
-        l->dataType = strdup(dataType); // Ex: "int", "void"
-        l->lines = (LineList) malloc(sizeof(struct LineListRec));
-        l->lines->lineno = lineno;
-        l->lines->next = NULL;
-        
-        l->next = hashTable[h];
-        hashTable[h] = l; 
-    } else { /* Já existe: apenas adiciona a linha e atualiza tipos se necessário */
-        LineList t = l->lines;
-        while (t->next != NULL) t = t->next;
-        
-        // Adiciona linha apenas se for nova
-        if (t->lineno != lineno) {
-            t->next = (LineList) malloc(sizeof(struct LineListRec));
-            t->next->lineno = lineno;
-            t->next->next = NULL;
-        }
-    }
+    /* Encadeia na lista */
+    l->next = hashTable[h];
+    hashTable[h] = l;
 }
 
-/* Busca simples: retorna se existe */
-int st_lookup(char * nome, char * escopo) {
-    int h = hash(nome);
+
+/* Busca simples pelo nome (retorna localização) */
+int st_lookup(char * name) {
+    int h = hash(name);
     BucketList l = hashTable[h];
     
-    while ((l != NULL) && ((strcmp(nome, l->nome) != 0) || (strcmp(escopo, l->escopo) != 0))) {
+    /* Retorna a primeira ocorrência encontrada (escopo mais recente) */
+    while ((l != NULL) && (strcmp(name, l->name) != 0))
         l = l->next;
-    }
-    
+        
     if (l == NULL) return -1;
-    else return 0;
+    else return l->loc;
 }
 
-/* Função auxiliar nova: Retorna o tipo de dado para checagem semântica */
-char* st_lookup_type(char * nome, char * escopo) {
-    int h = hash(nome);
+/* Busca específica por escopo (para evitar redeclaração) */
+int st_lookup_scope(char * name, int scope) {
+    int h = hash(name);
     BucketList l = hashTable[h];
-    while ((l != NULL) && ((strcmp(nome, l->nome) != 0) || (strcmp(escopo, l->escopo) != 0))) {
+    while (l != NULL) {
+        if (strcmp(name, l->name) == 0 && l->scope == scope) {
+            return l->loc;
+        }
         l = l->next;
     }
-    if (l == NULL) return NULL;
-    else return l->dataType;
+    return -1;
 }
 
-/* Imprime a tabela formatada conforme Slide 23 */
+/* Busca que retorna o registro completo (para checar tipos) */
+BucketList st_lookup_rec(char * name) {
+    int h = hash(name);
+    BucketList l = hashTable[h];
+    while ((l != NULL) && (strcmp(name, l->name) != 0))
+        l = l->next;
+    return l;
+}
+
+/* Imprime a tabela formatada */
 void printSymTab(FILE * listing) {
     int i;
-    // Cabeçalho conforme Page 23 do PDF
-    fprintf(listing, "Nome ID        Escopo         Tipo ID        Tipo dado      n. Linha\n");
-    fprintf(listing, "-------------  -------------  -------------  -------------  -------------\n");
-    
+    fprintf(listing, "Nome           Escopo  Tipo      Kind    Linha\n");
+    fprintf(listing, "-------------  ------  --------  ------  -----\n");
     for (i = 0; i < SIZE; ++i) {
         if (hashTable[i] != NULL) {
             BucketList l = hashTable[i];
             while (l != NULL) {
-                LineList t = l->lines;
-                fprintf(listing, "%-14s ", l->nome);
-                fprintf(listing, "%-14s ", l->escopo);
-                fprintf(listing, "%-14s ", l->idType);   // Novo campo
-                fprintf(listing, "%-14s ", l->dataType); // Novo campo
+                fprintf(listing, "%-14s %-6d  ", l->name, l->scope);
                 
-                while (t != NULL) {
-                    fprintf(listing, "%d ", t->lineno); // Formato simples de lista
-                    t = t->next;
-                }
-                fprintf(listing, "\n");
+                /* Imprime Tipo */
+                if(l->type == Integer) fprintf(listing, "INT       "); 
+                else if (l->type == Void) fprintf(listing, "VOID      ");
+                else fprintf(listing, "BOOL      ");
+
+                /* Imprime Kind */
+                if(l->kind == ID_VAR) fprintf(listing, "VAR     "); 
+                else if(l->kind == ID_FUN) fprintf(listing, "FUN     ");
+                else fprintf(listing, "ARRAY   ");
+
+                fprintf(listing, "%-5d\n", l->lineno);
                 l = l->next;
             }
         }
