@@ -16,6 +16,7 @@ TreeNode *novoNo(NodeType tipo, int lineno)
   no->tipoNo = tipo;
   no->lineno = lineno;
   no->type = Void;
+  no->scopeId = -1;
   return no;
 }
 

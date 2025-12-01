@@ -25,9 +25,9 @@ static int hash(char * key) {
 void st_insert(char * name, int lineno, int loc, int scope, 
                ExpType type, IdKind kind) {
     int h = hash(name);
-    BucketList l = hashTable[h];
+    BucketList l = (BucketList) malloc(sizeof(struct BucketListRec));
     
-    l = (BucketList) malloc(sizeof(struct BucketListRec));
+
     
     l->name = strdup(name);
     l->lineno = lineno;
@@ -39,6 +39,7 @@ void st_insert(char * name, int lineno, int loc, int scope,
     /* Zera os campos opcionais por segurança */
     l->size = 0;
     l->numParams = 0;
+    l->paramTypes = NULL;
 
     /* Encadeia na lista */
     l->next = hashTable[h];
@@ -72,20 +73,50 @@ int st_lookup_scope(char * name, int scope) {
     return -1;
 }
 
+BucketList st_lookup_scope_rec(char * name, int scope) {
+    int h = hash(name);
+    BucketList l = hashTable[h];
+    while (l != NULL) {
+        if (strcmp(l->name, name) == 0 && l->scope == scope) return l;
+        l = l->next;
+    }
+    return NULL;
+}
+
 /* Busca que retorna o registro completo (para checar tipos) */
 BucketList st_lookup_rec(char * name) {
     int h = hash(name);
     BucketList l = hashTable[h];
-    while ((l != NULL) && (strcmp(name, l->name) != 0))
+    while (l != NULL) {
+        if (strcmp(name, l->name) == 0) return l;
         l = l->next;
-    return l;
+    }
+    return NULL;
+}
+
+/* Define parâmetros para função já inserida */
+void st_set_params(char * name, int numParams, ExpType * types) {
+    BucketList l = st_lookup_rec(name);
+    if (l == NULL) return;
+    if (l->paramTypes != NULL) {
+        free(l->paramTypes);
+        l->paramTypes = NULL;
+    }
+    if (numParams > 0) {
+        l->paramTypes = (ExpType *) malloc(sizeof(ExpType) * numParams);
+        for (int i = 0; i < numParams; ++i) l->paramTypes[i] = types[i];
+        l->numParams = numParams;
+    } else {
+        l->paramTypes = NULL;
+        l->numParams = 0;
+    }
 }
 
 /* Imprime a tabela formatada */
 void printSymTab(FILE * listing) {
     int i;
-    fprintf(listing, "Nome           Escopo  Tipo      Kind    Linha\n");
-    fprintf(listing, "-------------  ------  --------  ------  -----\n");
+    fprintf(listing, "Nome           Escopo  Tipo      Kind    Linha  #P\n");
+    fprintf(listing, "-------------  ------  --------  ------  -----  ---\n");
     for (i = 0; i < SIZE; ++i) {
         if (hashTable[i] != NULL) {
             BucketList l = hashTable[i];
@@ -102,7 +133,7 @@ void printSymTab(FILE * listing) {
                 else if(l->kind == ID_FUN) fprintf(listing, "FUN     ");
                 else fprintf(listing, "ARRAY   ");
 
-                fprintf(listing, "%-5d\n", l->lineno);
+                fprintf(listing, "%-5d  %-3d\n", l->lineno, l->numParams);
                 l = l->next;
             }
         }

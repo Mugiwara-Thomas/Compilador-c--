@@ -437,7 +437,8 @@ int main(int argc, char **argv) {
         
         printf("\n=== Construindo Tabela de Símbolos ===\n");
         buildSymTab(raizArvore);
-
+        typeCheck(raizArvore);
+        
         printf("\n=== Árvore Sintática Abstrata ===\n");
         imprimeArvore(raizArvore, 0); 
     } else {

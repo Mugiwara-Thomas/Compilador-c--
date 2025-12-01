@@ -49,6 +49,7 @@ typedef struct TreeNode
   } attr;
 
   ExpType type;
+  int scopeId;
 } TreeNode;
 
 // Funções auxiliares
